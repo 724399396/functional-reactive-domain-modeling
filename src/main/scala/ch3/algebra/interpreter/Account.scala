@@ -7,11 +7,12 @@ object common {
   def today = Calendar.getInstance().getTime
 }
 
-import common._
+import ch3.algebra.interpreter.common._
 
 case class Balance(amount: Amount = 0)
 
-case class Account(no: String, name: String, dateOfOpen: Date = today, dateOfClose: Option[Date] = None,
-                   balance: Balance = Balance(0)) {
-
-}
+case class Account(no: String,
+                   name: String,
+                   dateOfOpen: Date = today,
+                   dateOfClose: Option[Date] = None,
+                   balance: Balance = Balance(0)) {}

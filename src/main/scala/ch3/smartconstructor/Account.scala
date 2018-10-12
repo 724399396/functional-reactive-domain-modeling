@@ -10,7 +10,7 @@ object common {
   def today = Calendar.getInstance.getTime
 }
 
-import common._
+import ch3.smartconstructor.common._
 
 case class Balance(amount: Amount = 0)
 
@@ -27,49 +27,83 @@ sealed trait Account {
   * to delegate both of them to the smart constructor. Still there can be some hairy issues
   * as in http://stackoverflow.com/questions/19462598/scala-case-class-implemention-of-smart-constructors
   */
-final case class CheckingAccount private (no: String, name: String,
-                                          dateOfOpen: Option[Date], dateOfClose: Option[Date] = None, balance: Balance = Balance()) extends Account {
+final case class CheckingAccount private (no: String,
+                                          name: String,
+                                          dateOfOpen: Option[Date],
+                                          dateOfClose: Option[Date] = None,
+                                          balance: Balance = Balance())
+    extends Account {
   def copy(no: String = no,
            name: String = name,
            dateOfOpen: Option[Date] = dateOfOpen,
            dateOfClose: Option[Date] = dateOfClose,
-           balance: Balance = balance) = Account.checkingAccount(no, name, dateOfOpen, dateOfClose, balance)
+           balance: Balance = balance) =
+    Account.checkingAccount(no, name, dateOfOpen, dateOfClose, balance)
 
   def apply(no: String = no,
             name: String = name,
             dateOfOpen: Option[Date] = dateOfOpen,
             dateOfClose: Option[Date] = dateOfClose,
-            balance: Balance = balance) = Account.checkingAccount(no, name, dateOfOpen, dateOfClose, balance)
+            balance: Balance = balance) =
+    Account.checkingAccount(no, name, dateOfOpen, dateOfClose, balance)
 }
 
-final case class SavingsAccount private (no: String, name: String, rateOfInterest: Amount,
-                                         dateOfOpen: Option[Date], dateOfClose: Option[Date] = None, balance: Balance = Balance()) extends Account {
+final case class SavingsAccount private (no: String,
+                                         name: String,
+                                         rateOfInterest: Amount,
+                                         dateOfOpen: Option[Date],
+                                         dateOfClose: Option[Date] = None,
+                                         balance: Balance = Balance())
+    extends Account {
 
   def copy(no: String = no,
            name: String = name,
            rateOfInterest: Amount = rateOfInterest,
            dateOfOpen: Option[Date] = dateOfOpen,
            dateOfClose: Option[Date] = dateOfClose,
-           balance: Balance = balance) = Account.savingsAccount(no, name, rateOfInterest, dateOfOpen, dateOfClose, balance)
+           balance: Balance = balance) =
+    Account.savingsAccount(
+      no,
+      name,
+      rateOfInterest,
+      dateOfOpen,
+      dateOfClose,
+      balance
+    )
 
   def apply(no: String = no,
             name: String = name,
             rateOfInterest: Amount = rateOfInterest,
             dateOfOpen: Option[Date] = dateOfOpen,
             dateOfClose: Option[Date] = dateOfClose,
-            balance: Balance = balance) = Account.savingsAccount(no, name, rateOfInterest, dateOfOpen, dateOfClose, balance)
+            balance: Balance = balance) =
+    Account.savingsAccount(
+      no,
+      name,
+      rateOfInterest,
+      dateOfOpen,
+      dateOfClose,
+      balance
+    )
 }
 
 object Account {
-  def checkingAccount(no: String, name: String, openDate: Option[Date], closeDate: Option[Date],
+  def checkingAccount(no: String,
+                      name: String,
+                      openDate: Option[Date],
+                      closeDate: Option[Date],
                       balance: Balance): Try[Account] = {
     closeDateCheck(openDate, closeDate).map { d =>
       CheckingAccount(no, name, Some(d._1), d._2, balance)
     }
   }
 
-  def savingsAccount(no: String, name: String, rate: BigDecimal, openDate: Option[Date],
-                     closeDate: Option[Date], balance: Balance): Try[Account] = {
+  def savingsAccount(no: String,
+                     name: String,
+                     rate: BigDecimal,
+                     openDate: Option[Date],
+                     closeDate: Option[Date],
+                     balance: Balance): Try[Account] = {
     println("in smart")
     closeDateCheck(openDate, closeDate).map { d =>
       if (rate <= BigDecimal(0))
@@ -79,14 +113,24 @@ object Account {
     }
   }
 
-  private def closeDateCheck(openDate: Option[Date], closeDate: Option[Date]): Try[(Date, Option[Date])] = {
+  private def closeDateCheck(
+    openDate: Option[Date],
+    closeDate: Option[Date]
+  ): Try[(Date, Option[Date])] = {
     val od = openDate.getOrElse(today)
 
-    closeDate.map { cd =>
-      if (cd before od) Failure(new Exception(s"Close date [$cd] cannot be earlier than open date [$od]"))
-      else Success((od, Some(cd)))
-    }.getOrElse {
-      Success((od, closeDate))
-    }
+    closeDate
+      .map { cd =>
+        if (cd before od)
+          Failure(
+            new Exception(
+              s"Close date [$cd] cannot be earlier than open date [$od]"
+            )
+          )
+        else Success((od, Some(cd)))
+      }
+      .getOrElse {
+        Success((od, closeDate))
+      }
   }
 }

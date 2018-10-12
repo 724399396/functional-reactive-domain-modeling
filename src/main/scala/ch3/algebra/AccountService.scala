@@ -11,9 +11,11 @@ trait AccountService[Account, Amount, Balance] {
   def credit(account: Account, amount: Amount): Try[Account]
   def balance(account: Account): Try[Balance]
 
-  def transfer(from: Account, to: Account, amount: Amount):
-    Try[(Account,Account,Amount)] = for {
+  def transfer(from: Account,
+               to: Account,
+               amount: Amount): Try[(Account, Account, Amount)] =
+    for {
       a <- debit(from, amount)
       b <- credit(to, amount)
-    } yield (a,b,amount)
+    } yield (a, b, amount)
 }
