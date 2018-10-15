@@ -1,8 +1,9 @@
-package ch3.algebra.interpreter
+package ch3
+package algebra
+package interpreter
 
 import java.util.Date
 
-import ch3.algebra.AccountService
 import ch3.algebra.interpreter.common._
 
 import scala.util.{Failure, Success, Try}
