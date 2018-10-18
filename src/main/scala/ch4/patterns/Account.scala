@@ -220,6 +220,56 @@ object Account {
     }
   }
 
+  object CustomErrorCollectionApplicative {
+    import scalaz._
+    import syntax.apply._
+    import syntax.std.option._
+    import syntax.validation._
+
+    private def validateAccountNo(no: String): Validation[String, String] =
+      if (no.isEmpty || no.size < 5)
+        s"Acconut No has to be at least 5 characters long: found $no"
+          .failure[String]
+      else no.success[String]
+
+    private def validateOpenCloseDate(od: Date, cd: Option[Date]) =
+      cd.map { c =>
+        if (c before od)
+          s"Close date [$c] cannot be earlier than open date [$od]"
+            .failure[(Option[Date], Option[Date])]
+        else (od.some, cd).success[String]
+      }
+        .getOrElse { (od.some, cd).success[String] }
+
+    private def validateRate(rate: BigDecimal) =
+      if (rate <= BigDecimal(0))
+        s"Interest rate $rate must be > 0".failure[BigDecimal]
+      else rate.success[String]
+
+    def savingsAccount(
+                        no: String,
+                        name: String,
+                        rate: BigDecimal,
+                        openDate: Option[Date],
+                        closeDate: Option[Date],
+                        balance: Balance
+                      ): Validation[String, Account] = {
+
+      val od = openDate.getOrElse(today)
+
+      implicit val stringSemigroup = new Semigroup[String] {
+        override def append(f1: String, f2: => String): String = f1 + f2
+      }
+      (
+        validateAccountNo(no) |@|
+          validateOpenCloseDate(openDate.getOrElse(today), closeDate) |@|
+          validateRate(rate)
+        )
+      { (n, d, r) => SavingsAccount(n, name, r, d._1, d._2, balance)
+      }
+    }
+  }
+
   import scalaz._
   import Scalaz._
   import ch3.repository._
@@ -239,4 +289,5 @@ object Account {
         whileM_(gets(_.exists), modify(_ => new Generator(r))).exec(start)
       }
   }
+
 }
