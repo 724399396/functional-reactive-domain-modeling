@@ -24,7 +24,9 @@ object Monoid {
     def zero = Map.empty[K, V]
     def op(m1: Map[K, V], m2: Map[K, V]) = m2.foldLeft(m1) { (a, e) =>
       val (key, value) = e
-      a.get(key).map(v => a + ((key, implicitly[Monoid[V]].op(v, value)))).getOrElse(a + ((key, value)))
+      a.get(key)
+        .map(v => a + ((key, implicitly[Monoid[V]].op(v, value))))
+        .getOrElse(a + ((key, value)))
     }
   }
 
@@ -37,11 +39,10 @@ object Monoid {
   }
 
   object MoneyOrdering extends Ordering[Money] {
-    def compare(a:Money, b:Money) = a.toBaseCurrency compare b.toBaseCurrency
+    def compare(a: Money, b: Money) = a.toBaseCurrency compare b.toBaseCurrency
   }
 
   import MoneyOrdering._
-  import scala.math.Ordering
 
   implicit val MoneyCompareMonoid = new Monoid[Money] {
     def zero = zeroMoney

@@ -1,10 +1,10 @@
 package ch4
 package patterns
 
-import scala.language.higherKinds
-
-import Monoid._
+import ch4.patterns.Monoid._
 import scalaz.State._
+
+import scala.language.higherKinds
 
 object State {
   type AccountNo = String
@@ -35,6 +35,3 @@ object State {
 
   updateBalance(txns) run balances
 }
-
-
-

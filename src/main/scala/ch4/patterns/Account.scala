@@ -206,8 +206,12 @@ object Account {
       } yield CheckingAccount(n, name, d._1.some, d._2.some, balance)
     }
 
-    def savingsAccount(no: String, name: String, rate: BigDecimal, openDate: Option[Date],
-                       closeDate: Option[Date], balance: Balance): Either[String, Account] = {
+    def savingsAccount(no: String,
+                       name: String,
+                       rate: BigDecimal,
+                       openDate: Option[Date],
+                       closeDate: Option[Date],
+                       balance: Balance): Either[String, Account] = {
 
       val cd = closeDate.getOrElse(today)
       val od = openDate.getOrElse(today)
@@ -234,11 +238,11 @@ object Account {
 
     private def validateOpenCloseDate(od: Date, cd: Option[Date]) =
       cd.map { c =>
-        if (c before od)
-          s"Close date [$c] cannot be earlier than open date [$od]"
-            .failure[(Option[Date], Option[Date])]
-        else (od.some, cd).success[String]
-      }
+          if (c before od)
+            s"Close date [$c] cannot be earlier than open date [$od]"
+              .failure[(Option[Date], Option[Date])]
+          else (od.some, cd).success[String]
+        }
         .getOrElse { (od.some, cd).success[String] }
 
     private def validateRate(rate: BigDecimal) =
@@ -246,14 +250,12 @@ object Account {
         s"Interest rate $rate must be > 0".failure[BigDecimal]
       else rate.success[String]
 
-    def savingsAccount(
-                        no: String,
-                        name: String,
-                        rate: BigDecimal,
-                        openDate: Option[Date],
-                        closeDate: Option[Date],
-                        balance: Balance
-                      ): Validation[String, Account] = {
+    def savingsAccount(no: String,
+                       name: String,
+                       rate: BigDecimal,
+                       openDate: Option[Date],
+                       closeDate: Option[Date],
+                       balance: Balance): Validation[String, Account] = {
 
       val od = openDate.getOrElse(today)
 
@@ -264,30 +266,28 @@ object Account {
         validateAccountNo(no) |@|
           validateOpenCloseDate(openDate.getOrElse(today), closeDate) |@|
           validateRate(rate)
-        )
-      { (n, d, r) => SavingsAccount(n, name, r, d._1, d._2, balance)
+      ) { (n, d, r) => SavingsAccount(n, name, r, d._1, d._2, balance)
       }
     }
   }
 
-  import scalaz._
-  import Scalaz._
   import ch3.repository._
+  import scalaz._
 
   object AccountNumberGeneration {
     final class Generator(rep: AccountRepository) {
       val no: String = scala.util.Random.nextString(10)
       def exists: Boolean = rep.query(no) match {
         case scala.util.Success(Some(a)) => true
-        case _ => false
+        case _                           => false
       }
     }
 
-      def generate(start: Generator, r: AccountRepository): Generator = {
-        val StateGen = StateT.stateMonad[Generator]
-        import StateGen._
-        whileM_(gets(_.exists), modify(_ => new Generator(r))).exec(start)
-      }
+    def generate(start: Generator, r: AccountRepository): Generator = {
+      val StateGen = StateT.stateMonad[Generator]
+      import StateGen._
+      whileM_(gets(_.exists), modify(_ => new Generator(r))).exec(start)
+    }
   }
 
 }
