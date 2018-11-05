@@ -20,6 +20,5 @@ case class Account(no: String, name: String, dateOfOpening: Date = today, dateOf
                    balance: Balance = Balance(0))
 
 object Account {
-
  implicit val showAccount: Show[Account] = Show.shows {case a: Account => a.toString}
 }

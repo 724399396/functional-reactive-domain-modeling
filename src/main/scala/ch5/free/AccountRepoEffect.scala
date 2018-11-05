@@ -1,8 +1,8 @@
 package ch5
 package free
 
-import scalaz.Scalaz._
 import scalaz._
+import scalaz.Scalaz._
 
 object AccountRepoState {
   type AccountMap = Map[String, Account]

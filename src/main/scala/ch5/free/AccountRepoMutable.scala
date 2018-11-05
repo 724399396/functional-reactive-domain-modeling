@@ -29,3 +29,18 @@ case class AccountRepoMutableInterpreter() extends AccountRepoInterpreter {
     */
   def apply[A](action: AccountRepo[A]): Task[A] = action.foldMap(step)
 }
+
+case class AccountRepoShowInterpreter() {
+  type ListState[A] = State[List[String], A]
+  val step: AccountRepoF ~> ListState = new (AccountRepoF ~> ListState) {
+    private def show(s: String): ListState[Unit] = State(l => (l ++ List(s), ()))
+    override def apply[A](fa: AccountRepoF[A]): ListState[A] = fa match {
+      case Query(no) => show(s"Query from $no").map(_ => Account(no, ""))
+      case Store(account) => show(s"Stroing account")
+      case Delete(no) => show(s"Deleting $no")
+    }
+  }
+
+  def interpret[A](script: AccountRepo[A], ls: List[String]): List[String] =
+    script.foldMap(step).exec(ls)
+}
