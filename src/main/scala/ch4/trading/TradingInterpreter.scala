@@ -4,15 +4,16 @@ package trading
 import ch4.trading.TradeModel._
 import scalaz.Kleisli._
 import scalaz.{ Order => _, _}
+import Scalaz._
 
 trait TradingInterpreter
     extends Trading[Account, Trade, ClientOrder, Order, Execution, Market] {
-  def clientOrders: Kleisli[List, List[ClientOrder], Order] =
-    kleisli(fromClientOrders)
+  def clientOrders: Kleisli[TradingOperation, List[ClientOrder], Order] =
+    kleisli[TradingOperation, List[ClientOrder], Order](orders => ListT(fromClientOrders(orders).traverse[Error,Order](_.right)))
 
   def execute(market: Market, brokerAccount: Account) =
-    kleisli[List, Order, Execution] { order =>
-      order.items.map { item =>
+    kleisli[TradingOperation, Order, Execution] { order =>
+      ListT(order.items.traverse[Error, Execution] { item =>
         Execution(
           brokerAccount,
           item.ins,
@@ -20,14 +21,14 @@ trait TradingInterpreter
           market,
           item.price,
           item.qty
-        )
-      }
+        ).right
+      })
     }
 
-  def allocate(accounts: List[Account]) = kleisli[List, Execution, Trade] {
+  def allocate(accounts: List[Account]) = kleisli[TradingOperation, Execution, Trade] {
     execution =>
       val q = execution.quantity / accounts.size
-      accounts.map { account =>
+      ListT(accounts.traverse[Error,Trade] { account =>
         makeTrade(
           account,
           execution.instrument,
@@ -35,8 +36,8 @@ trait TradingInterpreter
           execution.market,
           execution.unitPrice,
           q
-        )
-      }
+        ).right
+      })
   }
 }
 
