@@ -1,10 +1,10 @@
-package ch5
+package ch6
 package domain
 package repository
 
 import java.util.Date
 
-import ch5.domain.model.{Account, Balance}
+import domain.model.{Account, Balance}
 import scalaz.Scalaz._
 import scalaz._
 

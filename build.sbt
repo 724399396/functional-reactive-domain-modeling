@@ -14,9 +14,10 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-persistence" % "2.5.17",
   "com.typesafe.akka" %% "akka-stream" % "2.5.17",
   "com.typesafe.slick" %% "slick" % "3.2.3",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
   "com.h2database" % "h2" % "1.4.197",
   "com.zaxxer" % "HikariCP-java6" % "2.3.8",
-  "ch.qos.logback" % "logback-classic" % "1.1.3",
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
   "org.scalacheck" %% "scalacheck" % "1.14.0" % "test"
 )
 

@@ -1,4 +1,4 @@
-package ch5
+package ch6
 package domain
 package service
 package interpreter
@@ -11,7 +11,7 @@ import model.{Account, Balance}
 import model.common._
 
 class InterestPostingServiceInterpreter extends InterestPostingService[Account, Amount]{
-  def computeInterest: _root_.scalaz.Kleisli[_root_.ch5.domain.service.Valid, _root_.ch5.domain.model.Account, _root_.ch5.domain.model.common.Amount] =
+  def computeInterest: scalaz.Kleisli[Valid, Account, Amount] =
     kleisli[Valid, Account, Amount] { (account: Account) =>
       if (account.dateOfClose isDefined)
         NonEmptyList(s"Account ${account.no} is closed").left
